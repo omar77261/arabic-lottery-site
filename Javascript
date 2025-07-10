@@ -1,0 +1,88 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCAXym2ru6EnfFFxxVs513evpmZBlAllBc",
+  authDomain: "yanaseb-97dcc.firebaseapp.com",
+  projectId: "yanaseb-97dcc",
+  storageBucket: "yanaseb-97dcc.firebasestorage.app",
+  messagingSenderId: "155563793484",
+  appId: "1:155563793484:web:16550547fa6af4fe2ce8e9",
+  measurementId: "G-HWX76ZG8M8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
+const loginBtn = document.getElementById("loginBtn");
+const lotterySection = document.getElementById("lotterySection");
+const weeklyWinner = document.getElementById("weeklyWinner");
+const monthlyWinner = document.getElementById("monthlyWinner");
+const buyTicketBtn = document.getElementById("buyTicketBtn");
+const ticketNumberInput = document.getElementById("ticketNumber");
+const spinWheelBtn = document.getElementById("spinWheelBtn");
+const wheelResult = document.getElementById("wheelResult");
+
+const winnersData = {
+  weekly: "أحمد خليل - 04/07/2025",
+  monthly: "سارة رمضان - 07/07/2025"
+};
+
+function showWinners() {
+  weeklyWinner.textContent = winnersData.weekly;
+  monthlyWinner.textContent = winnersData.monthly;
+}
+
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      afterLogin(result.user);
+    } else {
+      checkUser();
+    }
+  })
+  .catch((error) => {
+    alert("خطأ في تسجيل الدخول: " + error.message);
+  });
+
+function checkUser() {
+  const user = auth.currentUser;
+  if (user) {
+    afterLogin(user);
+  }
+}
+
+function afterLogin(user) {
+  loginBtn.style.display = "none";
+  lotterySection.style.display = "block";
+  showWinners();
+}
+
+loginBtn.addEventListener("click", () => {
+  signInWithRedirect(auth, provider);
+});
+
+buyTicketBtn.addEventListener("click", () => {
+  const ticketNum = ticketNumberInput.value.trim();
+  if (/^\d{7}$/.test(ticketNum)) {
+    alert("تم شراء بطاقة رقم: " + ticketNum + " بسعر 7000 ل.س\nسنراسلك عبر الواتساب بعد التحويل.");
+    ticketNumberInput.value = "";
+  } else {
+    alert("يرجى إدخال رقم بطاقة صالح مكون من 7 أرقام.");
+  }
+});
+
+spinWheelBtn.addEventListener("click", () => {
+  const prizes = [
+    "5000 ليرة سورية",
+    "10000 ليرة سورية",
+    "لا شيء، حاول مرة أخرى!",
+    "هدية مجانية!",
+    "جائزة كبرى في السحب القادم!",
+    "1000 ليرة سورية",
+    "تذكرة مجانية للسحب الشهري"
+  ];
+  const randomIndex = Math.floor(Math.random() * prizes.length);
+  wheelResult.textContent = "لقد ربحت: " + prizes[randomIndex];
+});
